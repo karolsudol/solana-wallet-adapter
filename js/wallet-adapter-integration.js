@@ -1,12 +1,11 @@
+// js/wallet-adapter-integration.js
 document.addEventListener('DOMContentLoaded', (event) => {
-    const { WalletAdapterNetwork } = solanaWeb3;
-    const { Wallet } = solanaWalletAdapterWallets;
-    const { BaseWalletAdapter } = solanaWalletAdapterBase;
+    const { PhantomWalletAdapter } = solanaWalletAdapterWallets;
 
     const connectWalletButton = document.getElementById('connect-wallet');
     const walletAddressDiv = document.getElementById('wallet-address');
 
-    const wallet = new Wallet();
+    const wallet = new PhantomWalletAdapter();
 
     async function connectWallet() {
         try {
@@ -14,11 +13,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const address = wallet.publicKey.toString();
             walletAddressDiv.innerHTML = `Connected: ${address}`;
             
-            htmx.ajax('POST', '/connect-wallet', {
-                target: '#wallet-connection',
-                swap: 'innerHTML',
-                values: { address }
+            const response = await fetch('/connect-wallet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `address=${encodeURIComponent(address)}`,
             });
+
+            if (response.ok) {
+                const html = await response.text();
+                document.body.innerHTML = html;
+                // Re-attach event listener to the new connect button
+                document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+            } else {
+                console.error('Failed to connect wallet on server');
+            }
         } catch (error) {
             console.error('Failed to connect wallet:', error);
         }

@@ -4,10 +4,10 @@
 <head>
     <title>Solana HTMX App</title>
     <script src="https://unpkg.com/htmx.org@1.6.1"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets/dist/umd/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-base/dist/umd/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-react-ui/dist/umd/index.min.js"></script>
-    <script src="path/to/your/wallet-adapter-integration.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@latest/lib/index.iife.min.js"></script>
+    <script src="/js/wallet-adapter-integration.js"></script>
 </head>
 <body>
     <div id="wallet-connection">
@@ -15,15 +15,19 @@
         <div id="wallet-address"></div>
     </div>
 
-    {% if wallet_address.is_some() %}
-        <form hx-post="/send-sol">
-            <input type="hidden" name="from_address" value="{{ wallet_address.unwrap() }}">
-            <label for="to_address">To Address:</label>
-            <input type="text" id="to_address" name="to_address">
-            <label for="amount">Amount (SOL):</label>
-            <input type="text" id="amount" name="amount">
-            <button type="submit">Send Solana</button>
-        </form>
+    {% if let Some(address) = wallet_address %}
+        <div id="transaction-form">
+            <form hx-post="/send-sol" hx-target="#transaction-result">
+                <input type="hidden" id="from_address" name="from_address" value="{{ address }}">
+                <label for="to_address">To Address:</label>
+                <input type="text" id="to_address" name="to_address">
+                <label for="amount">Amount (SOL):</label>
+                <input type="text" id="amount" name="amount">
+                <button type="submit">Send Solana</button>
+            </form>
+        </div>
     {% endif %}
+
+    <div id="transaction-result"></div>
 </body>
 </html>

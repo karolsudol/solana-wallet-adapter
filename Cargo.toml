@@ -16,3 +16,5 @@ tower = "0.4"
 tower-http = "0.5.2"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+solana-client = "2.0"
+solana-sdk = "2.0"
