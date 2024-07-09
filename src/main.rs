@@ -7,8 +7,9 @@ use axum::{
     Router,
 };
 use serde::Deserialize;
-use std::net::SocketAddr;
 use tower::ServiceBuilder;
+use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -23,18 +24,23 @@ struct WalletAddress {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::registry()
+    .with(fmt::layer())
+    .with(EnvFilter::from_default_env())
+    .init();
+
     let app = Router::new()
         .route("/", get(index))
         .route("/connect-wallet", post(connect_wallet))
         .route("/send-sol", post(send_sol))
         .layer(ServiceBuilder::new().into_inner());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("Listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    .await
+    .unwrap();
+tracing::debug!("listening on {}", listener.local_addr().unwrap());
+axum::serve(listener, app).await.unwrap();
+    
 }
 
 async fn index() -> Html<String> {
