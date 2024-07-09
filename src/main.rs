@@ -43,6 +43,8 @@ struct WalletConnectionResponse {
     wallet_address: String,
 }
 
+pub const DEFAULT_ENV: &'static str = "RUST_LOG";
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::registry()
